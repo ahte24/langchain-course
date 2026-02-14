@@ -1,38 +1,37 @@
 from dotenv import load_dotenv
-from langchain.agents import create_agent
-from langchain_core.messages import HumanMessage
-from langchain_tavily import TavilySearch
-from pydantic import BaseModel, Field
-from typing import List
-from langchain_google_genai import ChatGoogleGenerativeAI
+
 load_dotenv()
-
-class Source(BaseModel):
-    """Schema for a source used by the agent"""
-
-    url: str = Field(description="The URL of the source")
-
-
-class AgentResponse(BaseModel):
-    """Schema for agent response with answer and sources"""
-
-    answer: str = Field(description="Thr agent's answer to the query")
-    sources: List[Source] = Field(
-        default_factory=list, description="List of sources used to generate the answer"
-    )
-
-llm = ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash",
-        temperature=0
-    )
+from langchain_classic import hub
+from langchain_classic.agents import AgentExecutor
+from langchain_classic.agents.react.agent import create_react_agent
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_tavily import TavilySearch
 
 tools = [TavilySearch()]
-agent = create_agent(model=llm, tools=tools, response_format=AgentResponse)
+llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
+react_prompt = hub.pull("hwchase17/react")
+
+agent = create_react_agent(
+    llm=llm,
+    tools=tools,
+    prompt=react_prompt,
+)
+
+agent_executor = AgentExecutor(
+    agent=agent, 
+    tools=tools, 
+    verbose=True,
+    handle_parsing_errors=True,
+)
+
+chain = agent_executor
 
 def main():
-    result = agent.invoke({ "messages": HumanMessage(
-                content="search for 3 job postings for an ai engineer using langchain in the bay area on linkedin and list their details?"
-            )})
+    result = chain.invoke(
+        input={
+            "input": "Search for 3 jobs for an ai engineer using langchain in banglore or hyderabad area and list there details with apply link"
+        },
+    )
     print(result)
 
 

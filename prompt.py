@@ -1,10 +1,7 @@
 REACT_PROMPT_WITH_FORMAT_INSTRUCTIONS = """
 Answer the following questions as best you can. You have access to the following tools:
-
 {tools}
-
 Use the following format:
-
 Question: the input question you must answer
 Thought: you should always think about what to do
 Action: the action to take, should be one of [{tool_names}]
@@ -12,14 +9,11 @@ Action Input: the input to the action
 Observation: the result of the action
 ... (this Thought/Action/Action Input/Observation can repeat N times)
 Thought: I now know the final answer
-Final Answer: the final answer to the original input question. 
-
-CRITICAL: The final answer MUST be a JSON object matching the format below, and it MUST be preceded by the string "Final Answer:".
-
-{format_instructions}
-
+Final Answer: the final answer to the original input question formatted according to format_instructions: {format_instructions}
+IMPORTANT: In your Final Answer, you MUST include:
+1. A clear answer to the question
+2. A list of ALL sources (URLs) you used from your observations to generate the answer
 Begin!
-
 Question: {input}
 Thought:{agent_scratchpad}
 """
